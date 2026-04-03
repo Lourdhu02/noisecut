@@ -1,0 +1,12 @@
+@"
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+node_modules/
+dist/
+*.egg-info/
+.DS_Store
+chroma_data/
+"@ | Set-Content -Path ".gitignore"

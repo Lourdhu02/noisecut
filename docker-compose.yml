@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: noisecut_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: noisecutuser
+      POSTGRES_PASSWORD: noisecutpass
+      POSTGRES_DB: noisecut
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: noisecut_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: noisecut_backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: postgresql://noisecutuser:noisecutpass@postgres:5432/noisecut
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./chroma_data:/app/chroma_data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: noisecut_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
